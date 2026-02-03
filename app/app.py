@@ -138,8 +138,8 @@ def create_app() -> Flask:
 
         user_id = int(session["user_id"])
         images = (
-            Image.query.filter_by(user_id=user_ud)
-            .order_by(Image.created_ar.desc())
+            Image.query.filter_by(user_id=user_id)
+            .order_by(Image.created_at.desc())
             .all()
         )
         return render_template("images.html", images=images)
@@ -190,7 +190,7 @@ def create_app() -> Flask:
                 final_path.unlink(missing_ok=True)
             except Exception:
                 pass
-            flash("Upload failed(DB). Please try again"
+            flash("Upload failed(DB). Please try again")
             return redirect(url_for("images_list"))
 
         flash("Uploaded")
@@ -207,7 +207,7 @@ def create_app() -> Flask:
 
         if not img:
             flash("Image not found")
-            return redirect(url_for("images_list")
+            return redirect(url_for("images_list"))
 
         if int(img.user_id) != user_id:
             flash("You can't delete this image")
