@@ -30,11 +30,22 @@
 </form>
 
 <h2>Your images</h2>
+
 <ul>
   {% for img in images %}
-    <li>
-      {{ img.original_filename }}
-      ({{ img.created_at }})
+    <li style="margin-bottom: 20px;">
+      <div>
+        <strong>{{ img.original_filename }}</strong>
+        ({{ img.created_at }})
+      </div>
+
+      <div>
+        <img
+          src="{{ url_for('images_file', image_id=img.id) }}"
+          alt="image"
+          style="max-width: 300px; display: block; margin-top: 5px;"
+        >
+      </div>
 
       <form method="post"
             action="{{ url_for('images_delete', image_id=img.id) }}"

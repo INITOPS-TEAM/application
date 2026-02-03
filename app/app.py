@@ -1,7 +1,7 @@
 import os
 import uuid
 from pathlib import Path
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+from flask import Flask, render_template, request, redirect, session, url_for, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -143,6 +143,25 @@ def create_app() -> Flask:
             .all()
         )
         return render_template("images.html", images=images)
+
+    @app.get("/images/<int:image_id>/file")
+    def images_file(image_id: int):
+        r = require_login()
+        if r:
+            return r
+
+        user_id = int(session["user_id"])
+        img = Image.query.get(image_id)
+
+        if not img:
+            flash("Image not found.")
+            return redirect(url_for("images_list"))
+
+        if int(img.user_id) != user_id:
+            flash("You can't view this image.")
+            return redirect(url_for("images_list"))
+
+        return send_file(img.stored_path)
 
     @app.post("/images/upload")
     def images_upload():
