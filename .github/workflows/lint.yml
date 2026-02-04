@@ -1,0 +1,81 @@
+name: Lint and Format Check
+on:
+  pull_request:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run markdownlint
+        uses: nosborn/github-action-markdown-cli@v3.5.0
+        continue-on-error: true
+        with:
+          files: .
+          dot: true
+
+      - name: Run Prettier
+        uses: creyD/prettier_action@v4.3
+        continue-on-error: true
+        with:
+          dry: true
+          prettier_options: --check **/*.{md,yaml,yml}
+
+      - name: Run CSpell
+        uses: streetsidesoftware/cspell-action@v6
+        continue-on-error: true
+        with:
+          files: |
+            **/*.{md,py,html,css}
+          inline: warning
+
+
+      - name: Setup Node for HTMLLint
+        uses: actions/setup-node@v4
+        with:
+          node-version: '23'
+
+      - name: Run HTMLLint
+        continue-on-error: true
+        run: |
+          npm install -g htmllint-cli
+          find . -name "*.html" -not -path "*/node_modules/*" -not -path "*/.git/*" | xargs -r htmllint
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Black
+        uses: psf/black@stable
+        continue-on-error: true
+        with:
+          options: "--check --verbose"
+
+      - name: Run isort
+        uses: isort/isort-action@v1
+        continue-on-error: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Run Pylint
+        continue-on-error: true
+        run: |
+          pip install pylint
+          files=$(find . -name "*.py" -not -path "*/venv/*" -not -path "*/.venv/*")
+          if [ -n "$files" ]; then
+            pylint --fail-under=7.5 --disable=import-error $files
+          else
+            echo "No Python files found."
+          fi
