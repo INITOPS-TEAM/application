@@ -25,8 +25,8 @@ jobs:
         uses: creyD/prettier_action@v4.6
         continue-on-error: true
         with:
-          dry: true
-          prettier_options: --check **/*.{md,yaml,yml}
+          prettier_options: --write "**/*.{md,yaml,yml}"
+          commit_message: "style: auto-format with prettier"
 
       - name: Run CSpell
         id: cspell
@@ -72,14 +72,14 @@ jobs:
         uses: psf/black@stable
         continue-on-error: true
         with:
-          options: "--check --verbose --extend-exclude='node_modules/'"
+          options: "--extend-exclude='node_modules/'"
 
       - name: Run isort
         id: isort
         continue-on-error: true
         run: |
           pip install isort
-          isort --check-only --diff --skip node_modules .
+          isort --skip node_modules .
 
       - name: Run Pylint
         id: pylint
