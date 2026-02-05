@@ -2,9 +2,6 @@ name: Lint and Format Check
 on:
   pull_request:
   push:
-permissions:
-  contents: write
-  pull-requests: write
 
 jobs:
   lint-and-format:
@@ -28,8 +25,8 @@ jobs:
         uses: creyD/prettier_action@v4.6
         continue-on-error: true
         with:
-          prettier_options: --write "**/*.{md,yaml,yml}"
-          commit_message: "style: auto-format with prettier"
+          dry: true
+          prettier_options: --check **/*.{md,yaml,yml}
 
       - name: Run CSpell
         id: cspell
@@ -75,14 +72,14 @@ jobs:
         uses: psf/black@stable
         continue-on-error: true
         with:
-          options: "--extend-exclude='node_modules/'"
+          options: "--check --verbose --extend-exclude='node_modules/'"
 
       - name: Run isort
         id: isort
         continue-on-error: true
         run: |
           pip install isort
-          isort --skip node_modules .
+          isort --check-only --diff --skip node_modules .
 
       - name: Run Pylint
         id: pylint
@@ -174,4 +171,5 @@ jobs:
           if [ $failed -gt 0 ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Please fix the linting issues above**" >> $GITHUB_STEP_SUMMARY
+            exit 1
           fi
