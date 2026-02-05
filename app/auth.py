@@ -14,9 +14,9 @@ def index():
 
 @auth_routes.get("/profile")
 def profile():
-    r = require_login()
-    if r:
-        return r
+    login_redirect = require_login()
+    if login_redirect:
+        return login_redirect
     return render_template("profile.html")
 
 @auth_routes.route("/register", methods=["GET", "POST"])

@@ -10,9 +10,9 @@ image_routes = Blueprint("images", __name__)
 
 @image_routes.get("/images")
 def images_list():
-    r = require_login()
-    if r:
-        return r
+    login_redirect = require_login()
+    if login_redirect:
+        return login_redirect
 
     user_id = int(session["user_id"])
     images = (
@@ -24,9 +24,9 @@ def images_list():
 
 @image_routes.get("/images/<int:image_id>/file")
 def images_file(image_id: int):
-    r = require_login()
-    if r:
-        return r
+    login_redirect = require_login()
+    if login_redirect:
+        return login_redirect
 
     user_id = int(session["user_id"])
     img = Image.query.get(image_id)
@@ -39,9 +39,9 @@ def images_file(image_id: int):
 
 @image_routes.post("/images/upload")
 def images_upload():
-    r = require_login()
-    if r:
-        return r
+    login_redirect = require_login()
+    if login_redirect:
+        return login_redirect
 
     user_id = int(session["user_id"])
     f = request.files.get("image")
@@ -78,9 +78,9 @@ def images_upload():
 
 @image_routes.post("/images/<int:image_id>/delete")
 def images_delete(image_id: int):
-    r = require_login()
-    if r:
-        return r
+    login_redirect = require_login()
+    if login_redirect:
+        return login_redirect
 
     user_id = int(session["user_id"])
     img = Image.query.get(image_id)
