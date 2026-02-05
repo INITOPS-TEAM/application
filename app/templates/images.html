@@ -7,8 +7,8 @@
 <body>
 
 <p>
-    <a href="{{ url_for('profile') }}">Profile</a> |
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <a href="{{ url_for('auth.profile') }}">Profile</a> |
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
 </p>
 
 {% with messages = get_flashed_messages() %}
@@ -23,7 +23,7 @@
 
 <h2>Upload image</h2>
 <form method="post"
-      action="{{ url_for('images_upload') }}"
+      action="{{ url_for('images.images_upload') }}"
       enctype="multipart/form-data">
     <input type="file" name="image" required>
     <button type="submit">Upload</button>
@@ -41,14 +41,14 @@
 
       <div>
         <img
-          src="{{ url_for('images_file', image_id=img.id) }}"
+          src="{{ url_for('images.images_file', image_id=img.id) }}"
           alt="image"
           style="max-width: 300px; display: block; margin-top: 5px;"
         >
       </div>
 
       <form method="post"
-            action="{{ url_for('images_delete', image_id=img.id) }}"
+            action="{{ url_for('images.images_delete', image_id=img.id) }}"
             style="display:inline">
           <button type="submit">Delete</button>
       </form>
