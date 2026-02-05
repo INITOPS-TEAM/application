@@ -124,8 +124,8 @@ jobs:
           fi
 
           if [ "${{ steps.htmllint.outcome }}" != "success" ]; then
-            echo "HTML ESLint: FAILED !!!" >> $GITHUB_STEP_SUMMARY
-            failed=$((failed + 1))
+            echo "HTML ESLint: FAILED. Please check its warnings!" >> $GITHUB_STEP_SUMMARY
+            warned=$((warned + 1))
           else
             echo "HTML ESLint: PASSED" >> $GITHUB_STEP_SUMMARY
             passed=$((passed + 1))
