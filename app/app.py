@@ -1,10 +1,13 @@
 import os
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+
+from flask import (Flask, flash, redirect, render_template, request, session,
+                   url_for)
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text
+from werkzeug.security import check_password_hash, generate_password_hash
 
 db = SQLAlchemy()
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -24,7 +27,9 @@ def create_app() -> Flask:
     with app.app_context():
         required = {"users", "images"}
         rows = db.session.execute(
-            text("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname='public';")
+            text(
+                "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname='public';"
+            )
         ).fetchall()
         existing = {r[0] for r in rows}
         missing = required - existing
@@ -32,6 +37,7 @@ def create_app() -> Flask:
             raise RuntimeError(
                 f"Missing DB tables: {sorted(missing)}. Run DB setup first."
             )
+
     def require_login():
         if not session.get("user_id"):
             return redirect(url_for("login"))
@@ -71,7 +77,7 @@ def create_app() -> Flask:
 
             session["user_id"] = int(u.id)
             return redirect(url_for("profile"))
-        return render_template ("register.html")
+        return render_template("register.html")
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -95,8 +101,8 @@ def create_app() -> Flask:
 
     return app
 
+
 app = create_app()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
