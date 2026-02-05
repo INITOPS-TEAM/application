@@ -1,18 +1,17 @@
-import { defineConfig } from "eslint/config";
 import html from "@html-eslint/eslint-plugin";
+import htmlParser from "@html-eslint/parser";
 
-export default defineConfig([
-  // lint html files
+export default [
   {
     files: ["**/*.html"],
     plugins: {
-      html,
+      "@html-eslint": html,
     },
-    // When using the recommended rules (or "html/all" for all rules)
-    extends: ["html/recommended"],
-    language: "html/html",
+    languageOptions: {
+      parser: htmlParser,
+    },
     rules: {
-      "html/no-duplicate-class": "error",
+      ...html.configs.recommended.rules,
     },
   },
-]);
+];
