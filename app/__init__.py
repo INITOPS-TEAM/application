@@ -19,7 +19,7 @@ def create_app() -> Flask:
 
     db.init_app(app)
 
-    from .models import User, Image
+    from .models import User, Image, Like
     from .auth import auth_routes
     from .images import image_routes
 
