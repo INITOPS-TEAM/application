@@ -15,3 +15,9 @@ class Image(db.Model):
     stored_filename = db.Column(db.Text, nullable=False, unique=True)
     stored_path = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=text("now()"), nullable=False)
+
+class Like(db.Model):
+    __tablename__ = "likes"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False, index=True)
+    image_id = db.Column(db.Integer, nullable=False, index=True)

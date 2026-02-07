@@ -47,11 +47,29 @@
         >
       </div>
 
+      <p>Likes: {{ img.likes_count }}</p>
+
+      {% if img.is_liked_by_user %}
+        <form method="post"
+              action="{{ url_for('images.unlike_image', image_id=img.id) }}"
+              style="display:inline">
+            <button type="submit">Unlike</button>
+        </form>
+      {% else %}
+        <form method="post"
+              action="{{ url_for('images.like_image', image_id=img.id) }}"
+              style="display:inline">
+            <button type="submit">Like</button>
+        </form>
+      {% endif %}
+
+      {% if img.user_id == current_user_id %}
       <form method="post"
             action="{{ url_for('images.images_delete', image_id=img.id) }}"
             style="display:inline">
           <button type="submit">Delete</button>
       </form>
+      {% endif %}
     </li>
   {% else %}
     <li>No images yet.</li>

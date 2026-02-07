@@ -1,8 +1,8 @@
 import uuid
 from pathlib import Path
-from flask import Blueprint, render_template, request, redirect, session, url_for, flash, send_file, current_app
+from flask import Blueprint, render_template, request, redirect, session, url_for, flash, send_file, current_app, jsonify
 from werkzeug.utils import secure_filename
-from .models import Image
+from .models import Image, Like
 from . import db
 from .utils import require_login, user_upload_dir, ALLOWED_EXT
 
@@ -15,12 +15,13 @@ def images_list():
         return login_redirect
 
     user_id = int(session["user_id"])
-    images = (
-        Image.query.filter_by(user_id=user_id)
-        .order_by(Image.created_at.desc())
-        .all()
-    )
-    return render_template("images.html", images=images)
+    images = Image.query.order_by(Image.created_at.desc()).all()
+
+    for img in images:
+        img.likes_count = Like.query.filter_by(image_id=img.id).count()
+        img.is_liked_by_user = Like.query.filter_by(image_id=img.id, user_id=user_id).first() is not None
+
+    return render_template("images.html", images=images, current_user_id=user_id)
 
 @image_routes.get("/images/<int:image_id>/file")
 def images_file(image_id: int):
@@ -31,8 +32,8 @@ def images_file(image_id: int):
     user_id = int(session["user_id"])
     img = Image.query.get(image_id)
 
-    if not img or img.user_id != user_id:
-        flash("Access denied")
+    if not img:
+        flash("Image not found")
         return redirect(url_for("images.images_list"))
 
     return send_file(img.stored_path)
@@ -97,4 +98,46 @@ def images_delete(image_id: int):
     file_path.unlink(missing_ok=True)
 
     flash("Deleted")
+    return redirect(url_for("images.images_list"))
+
+@image_routes.post("/images/<int:image_id>/like")
+def like_image(image_id: int):
+    login_redirect = require_login()
+    if login_redirect:
+        return login_redirect
+
+    user_id = int(session["user_id"])
+    img = Image.query.get(image_id)
+    if not img:
+        flash("Image not found")
+        return redirect(url_for("images.images_list"))
+
+    existing_like = Like.query.filter_by(user_id=user_id, image_id=image_id).first()
+    if existing_like:
+        flash("You already liked this image.")
+        return redirect(url_for("images.images_list"))
+
+    like = Like(user_id=user_id, image_id=image_id)
+    db.session.add(like)
+    db.session.commit()
+
+    flash("Image liked.")
+    return redirect(url_for("images.images_list"))
+
+@image_routes.post("/images/<int:image_id>/unlike")
+def unlike_image(image_id: int):
+    login_redirect = require_login()
+    if login_redirect:
+        return login_redirect
+
+    user_id = int(session["user_id"])
+    like = Like.query.filter_by(user_id=user_id, image_id=image_id).first()
+    if not like:
+        flash("You haven't liked this image.")
+        return redirect(url_for("images.images_list"))
+
+    db.session.delete(like)
+    db.session.commit()
+
+    flash("Like removed.")
     return redirect(url_for("images.images_list"))
