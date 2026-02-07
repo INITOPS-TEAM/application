@@ -50,3 +50,19 @@ PostgreSQL stores metadata only:
 - In a deployed environment the app is accessed via load balancer or directly via VM IP
 - `UPLOAD_ROOT` can be overridden via an environment variable in deployed environments.
 
+## Code Quality: Linting and Formatting
+Automated checks via GitHub Actions:
+- **Markdownlint** - Markdown files
+- **Prettier** - Code formatting  
+- **CSpell** - Spell checking
+- **ESLint** - HTML templates
+- **Black & isort** - Python formatting
+- **Pylint** - Python linting (fail under 7.5)
+- **Gitleaks** - Secret scanning
+
+### Workflow Behavior
+**Warnings** (don't block): Markdownlint, Prettier, CSpell, Black, isort, ESLint  
+**Critical failures** (block merge): Gitleaks, Pylint
+
+Total failed count includes both, but only critical failures prevent merging.
+
