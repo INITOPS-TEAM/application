@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, session, url_fo
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 from . import db
-from .utils import require_login
+from .utils import require_login, get_client_ip
 
 auth_routes = Blueprint("auth", __name__)
 
@@ -52,6 +52,9 @@ def login():
         if not u or not check_password_hash(u.password_hash, password):
             flash("Invalid credentials")
             return render_template("login.html")
+
+        u.last_ip = get_client_ip()
+        db.session.commit()
 
         session["user_id"] = int(u.id)
         return redirect(url_for("auth.profile"))

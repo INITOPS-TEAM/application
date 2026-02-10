@@ -6,6 +6,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.Text, unique=True, nullable=False)
     password_hash = db.Column(db.Text, nullable=False)
+    last_ip = db.Column(db.Text)
 
 class Image(db.Model):
     __tablename__ = "images"
@@ -21,3 +22,8 @@ class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False, index=True)
     image_id = db.Column(db.Integer, nullable=False, index=True)
+
+class Banned(db.Model):
+    __tablename__ = "banned"
+    id = db.Column(db.Integer, primary_key=True)
+    ip = db.Column(db.Text, unique=True)

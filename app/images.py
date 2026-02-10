@@ -1,6 +1,6 @@
 import uuid
 from pathlib import Path
-from flask import Blueprint, render_template, request, redirect, session, url_for, flash, send_file, current_app, jsonify
+from flask import Blueprint, render_template, request, redirect, session, url_for, flash, send_file, current_app
 from werkzeug.utils import secure_filename
 from .models import Image, Like
 from . import db
