@@ -1,5 +1,5 @@
 from pathlib import Path
-from flask import session, redirect, url_for
+from flask import session, redirect, url_for, request
 from werkzeug.utils import secure_filename
 
 ALLOWED_EXT = {".jpg", ".jpeg", ".png", ".webp"}
@@ -21,3 +21,9 @@ def pick_ext(filename: str) -> str:
     if ext not in ALLOWED_EXT:
         raise ValueError("Unsupported file type. Use jpg,jpeg,png,webp")
     return ext
+
+def get_client_ip():
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+    if ip and "," in ip:
+        ip = ip.split(",")[0].strip()
+    return ip

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Panel</title>
+</head>
+<body>
+  <h1>Admin Panel - Users</h1>
+
+  <p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+
+  <form method="get" action="{{ url_for('admin.admin_index') }}" style="margin-bottom: 15px;">
+    <input type="text" name="ip" placeholder="Search by IP" value="{{ request.args.get('ip', '') }}">
+    <button type="submit">Search</button>
+  </form>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul style="color: red;">
+        {% for msg in messages %}
+          <li>{{ msg }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Last IP</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        {% set is_admin = (user.username == "admin") %}
+        {% set is_banned = user.is_banned %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.last_ip or "N/A" }}</td>
+          <td>
+            {% if is_admin %}
+              <em>Admin</em>
+            {% else %}
+              <form method="post" action="{{ url_for('admin.admin_unban_user' if is_banned else 'admin.admin_ban_user', user_id=user.id) }}" style="margin:0;">
+                <button type="submit">{{ "Unban" if is_banned else "Ban" }}</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
