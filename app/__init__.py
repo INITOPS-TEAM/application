@@ -16,7 +16,9 @@ def create_app() -> Flask:
 
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["UPLOAD_ROOT"] = os.environ.get("UPLOAD_ROOT", "/var/lib/pictapp/uploads")
+
+    app.config["AWS_REGION"] = os.environ["AWS_REGION"]
+    app.config["S3_BUCKET_NAME"] = os.environ["S3_BUCKET_NAME"]
 
     db.init_app(app)
 
@@ -28,6 +30,10 @@ def create_app() -> Flask:
     app.register_blueprint(auth_routes)
     app.register_blueprint(image_routes)
     app.register_blueprint(admin_routes)
+
+    @app.route("/health")
+    def health():
+        return "OK", 200
 
     @app.before_request
     def check_banned():
@@ -46,7 +52,7 @@ def create_app() -> Flask:
         ip = get_client_ip()
 
         if Banned.query.filter_by(ip=ip).first():
-            return redirect("https://zakon.rada.gov.ua/laws/show/2341-14/page11#Text")
+            return redirect("https://zakon.rada.gov.ua/laws/show/2341-14/conv/paran1661#n1661")
 
         return None
 
