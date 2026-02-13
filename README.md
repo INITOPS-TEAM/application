@@ -58,7 +58,7 @@ Automated checks via GitHub Actions:
 - **ESLint** - HTML templates
 - **Black & isort** - Python formatting
 - **Pylint** - Python linting (fail under 7.5)
-- **Gitleaks** - Secret scanning
+- **Gitleaks** - Secret scanning. To enable Gitleaks pre-commit hooks locally, install Gitleaks following [the official installation guide.](https://github.com/gitleaks/gitleaks#installing)
 
 ### Workflow Behavior
 **Warnings** (don't block): Markdownlint, Prettier, CSpell, Black, isort, ESLint  
