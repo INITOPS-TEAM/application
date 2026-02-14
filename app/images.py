@@ -1,5 +1,6 @@
 import uuid
 import boto3
+import os
 from pathlib import Path
 from flask import Blueprint, render_template, request, redirect, session, url_for, flash, send_file, current_app
 from werkzeug.utils import secure_filename
@@ -10,7 +11,12 @@ from .utils import require_login, user_upload_dir, ALLOWED_EXT
 image_routes = Blueprint("images", __name__)
 
 def get_s3():
-    return boto3.client("s3")
+    return boto3.client(
+        "s3",
+        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY"),
+        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+        region_name=os.environ.get("AWS_REGION"),
+    )
 
 @image_routes.get("/images")
 def images_list():
@@ -20,6 +26,7 @@ def images_list():
 
     user_id = int(session["user_id"])
     images = Image.query.order_by(Image.created_at.desc()).all()
+    editing_image_id = request.args.get("editing_image_id", type=int)
     s3 = get_s3()
 
     for img in images:
@@ -32,7 +39,7 @@ def images_list():
             ExpiresIn=3600
         )
 
-    return render_template("images.html", images=images, current_user_id=user_id)
+    return render_template("images.html", images=images, current_user_id=user_id, editing_image_id=editing_image_id)
 
 @image_routes.post("/images/upload")
 def images_upload():
@@ -42,6 +49,8 @@ def images_upload():
 
     user_id = int(session["user_id"])
     f = request.files.get("image")
+    description = request.form.get("description")
+    location = request.form.get("location")
 
     if not f or not f.filename:
         flash("No file selected")
@@ -65,9 +74,9 @@ def images_upload():
 
     img = Image(
         user_id=user_id,
-        original_filename=original,
         stored_filename=stored_filename,
-        stored_path=stored_filename
+        description=description,
+        location=location
     )
 
     db.session.add(img)
@@ -75,6 +84,27 @@ def images_upload():
 
     flash("Uploaded")
     return redirect(url_for("images.images_list"))
+
+@image_routes.route("/images/<int:image_id>/edit", methods=["GET", "POST"])
+def images_edit(image_id: int):
+    login_redirect = require_login()
+    if login_redirect:
+        return login_redirect
+
+    user_id = int(session["user_id"])
+    img = Image.query.get(image_id)
+    if not img or img.user_id != user_id:
+        flash("Access denied")
+        return redirect(url_for("images.images_list"))
+
+    if request.method == "POST":
+        img.description = request.form["description"]
+        img.location = request.form["location"]
+        db.session.commit()
+        flash("Image updated")
+        return redirect(url_for("images.images_list"))
+
+    return redirect(url_for("images.images_list", editing_image_id=image_id))
 
 @image_routes.post("/images/<int:image_id>/delete")
 def images_delete(image_id: int):
