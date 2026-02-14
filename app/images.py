@@ -26,6 +26,7 @@ def images_list():
 
     user_id = int(session["user_id"])
     images = Image.query.order_by(Image.created_at.desc()).all()
+    editing_image_id = request.args.get("editing_image_id", type=int)
     s3 = get_s3()
 
     for img in images:
@@ -38,7 +39,7 @@ def images_list():
             ExpiresIn=3600
         )
 
-    return render_template("images.html", images=images, current_user_id=user_id)
+    return render_template("images.html", images=images, current_user_id=user_id, editing_image_id=editing_image_id)
 
 @image_routes.post("/images/upload")
 def images_upload():
@@ -83,6 +84,27 @@ def images_upload():
 
     flash("Uploaded")
     return redirect(url_for("images.images_list"))
+
+@image_routes.route("/images/<int:image_id>/edit", methods=["GET", "POST"])
+def images_edit(image_id: int):
+    login_redirect = require_login()
+    if login_redirect:
+        return login_redirect
+
+    user_id = int(session["user_id"])
+    img = Image.query.get(image_id)
+    if not img or img.user_id != user_id:
+        flash("Access denied")
+        return redirect(url_for("images.images_list"))
+
+    if request.method == "POST":
+        img.description = request.form["description"]
+        img.location = request.form["location"]
+        db.session.commit()
+        flash("Image updated")
+        return redirect(url_for("images.images_list"))
+
+    return redirect(url_for("images.images_list", editing_image_id=image_id))
 
 @image_routes.post("/images/<int:image_id>/delete")
 def images_delete(image_id: int):

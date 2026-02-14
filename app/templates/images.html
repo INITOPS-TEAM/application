@@ -45,6 +45,18 @@
       <p>Location: {{ img.location }}</p>
       <p>Likes: {{ img.likes_count }}</p>
 
+      {% if editing_image_id == img.id %}
+      <form method="post" action="{{ url_for('images.images_edit', image_id=img.id) }}" method="post">
+        <input type="text" name="description" value="{{ img.description }}">
+        <input type="text" name="location" value="{{ img.location }}">
+        <button type="submit">Save</button>
+      </form>
+    {% else %}
+      <form action="{{ url_for('images.images_edit', image_id=img.id) }}" method="get" style="display:inline;">
+        <button type="submit">Edit</button>
+      </form>
+    {% endif %}
+
       {% if img.is_liked_by_user %}
         <form method="post"
               action="{{ url_for('images.unlike_image', image_id=img.id) }}"
