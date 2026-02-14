@@ -26,6 +26,8 @@
       action="{{ url_for('images.images_upload') }}"
       enctype="multipart/form-data">
     <input type="file" name="image" required>
+    <input type="text" name="description" placeholder="Description">
+    <input type="text" name="location" placeholder="Location">
     <button type="submit">Upload</button>
 </form>
 
@@ -33,20 +35,14 @@
 
 <ul>
   {% for img in images %}
-    <li style="margin-bottom: 20px;">
-      <div>
-        <strong>{{ img.original_filename }}</strong>
-        ({{ img.created_at }})
-      </div>
-
-      <div>
+    <li>
         <img
           src="{{ img.s3_url }}"
           alt="image"
           style="max-width: 300px; display: block; margin-top: 5px;"
         >
-      </div>
-
+      <p>Description: {{ img.description }}</p>
+      <p>Location: {{ img.location }}</p>
       <p>Likes: {{ img.likes_count }}</p>
 
       {% if img.is_liked_by_user %}

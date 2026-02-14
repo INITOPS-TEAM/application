@@ -20,7 +20,6 @@ The same path is used on all application VMs.
 ## Database
 PostgreSQL stores metadata only:
 - user_id
-- original filename
 - stored filename
 - file path
 - creation timestamp

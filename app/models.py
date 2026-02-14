@@ -12,10 +12,10 @@ class Image(db.Model):
     __tablename__ = "images"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False, index=True)
-    original_filename = db.Column(db.Text, nullable=False)
     stored_filename = db.Column(db.Text, nullable=False, unique=True)
-    stored_path = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=text("now()"), nullable=False)
+    description = db.Column(db.String, nullable=True)
+    location = db.Column(db.String, nullable=True)
 
 class Like(db.Model):
     __tablename__ = "likes"
