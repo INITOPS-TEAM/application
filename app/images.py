@@ -11,12 +11,7 @@ from .utils import require_login, user_upload_dir, ALLOWED_EXT
 image_routes = Blueprint("images", __name__)
 
 def get_s3():
-    return boto3.client(
-        "s3",
-        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY"),
-        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
-        region_name=os.environ.get("AWS_REGION"),
-    )
+    return boto3.client("s3")
 
 @image_routes.get("/images")
 def images_list():
