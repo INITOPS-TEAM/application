@@ -1,53 +1,77 @@
 # PictApp – Image Upload
-
-Simple Flask web application with user authentication and image upload functionality.
+Flask web application for image sharing with authentication, AWS S3 storage, likes, hidden locations and admin IP banning.
 
 ## Features
 - User registration, login, logout
-- Upload images for authenticated users
-- List and delete user images
-- Image files are stored on disk (synced folder)
-- PostgreSQL stores image metadata only (no binary data)
+- Image upload to AWS S3
+- Like/Unlike images
+- Edit and delete own images
+- Optional hidden image location protected by password
+- Admin panel:
+  - View all users
+  - Search users by IP
+  - Ban/Unban users by IP
 
-## Storage
-Uploaded images are stored on disk under a shared directory:
+## Architecture Overview
+- **Backend:** Flask 3
+- **Database:** PostgreSQL (metadata only)
+- **ORM:** SQLAlchemy
+- **Storage:** AWS S3 (image files)
+- **Authentication:** Session-based
+- **Password hashing:** Werkzeug security
+Images are stored in AWS S3.  
+PostgreSQL stores only metadata (no binary image data).
 
-/var/lib/pictapp/uploads/
+## Database Tables
+The application requires the following tables:
+- `users`
+- `images`
+- `likes`
+- `banned`
+The app fails on startup if required tables are missing.
 
-Each user has a separate subdirectory.
-The same path is used on all application VMs.
+## Required Environment Variables
+You must define:
+**FLASK_SECRET_KEY**
+**DATABASE_URL**
+**AWS_REGION**
+**S3_BUCKET_NAME**
 
-## Database
-PostgreSQL stores metadata only:
-- user_id
-- stored filename
-- file path
-- creation timestamp
+### Example
+FLASK_SECRET_KEY="supersecret"
+DATABASE_URL="postgresql://pictapp_user:password@localhost:5432/pictapp"
+AWS_REGION="eu-north-1"
+S3_BUCKET_NAME="my-pictapp-bucket"
 
 ## Run locally
 1. Create and activate a virtual environment
 2. Install dependencies from "requirements.txt"
-3. Set required environment variables:
-- `FLASK_SECRET_KEY` (any random string)
-- `DATABASE_URL` (SQLAlchemy URL), e.g.:
-    ```text
-    postgresql+psycopg2://pictapp_user@192.168.56.13:5432/pictapp
-    ```
-    The database password should be stored in `~/.pgpass` to avoid exposing credentials.
-4. Start the application:
-    ```bash
-    python app.py
-    ```
-5. Open the app in a browser:
-    ```text
-    http//localhost:5000
-    ```
+3. Set required environment variables (see above)
+4. Run the application:
+python run.py
+The app will be available at:
+http://localhost:5000
+
+## Project Structure
+app/
+├── templates/
+├── init.py
+├── admin.py
+├── auth.py
+├── images.py
+├── models.py
+├── utils.py
+requirements.txt
+run.py
 
 ## Notes
-- The application fails fast on startup if required DB tables (`users`, `images`) are missing.
+- The application fails fast on startup if required DB tables are missing.
 - In our setup, the DB schema is applied via Jenkins/Ansible from the infrastructure repository (`ansible/roles/db/files/schema.sql`).
 - In a deployed environment the app is accessed via load balancer or directly via VM IP
-- `UPLOAD_ROOT` can be overridden via an environment variable in deployed environments.
+- Passwords are hashed using Werkzeug
+- Image location can be hidden with password protection
+- Admin can ban users by IP
+- Banned IPs are checked before each request  
 
 ## Code Quality: Linting and Formatting
 Automated checks via GitHub Actions:

@@ -28,6 +28,10 @@
     <input type="file" name="image" required>
     <input type="text" name="description" placeholder="Description">
     <input type="text" name="location" placeholder="Location">
+    <label>
+        <input type="checkbox" name="hide_location"> Hide location
+    </label>
+    <input type="password" name="location_password" placeholder="Password to hide location">
     <button type="submit">Upload</button>
 </form>
 
@@ -36,48 +40,65 @@
 <ul>
   {% for img in images %}
     <li>
-        <img
-          src="{{ img.s3_url }}"
-          alt="image"
-          style="max-width: 300px; display: block; margin-top: 5px;"
-        >
-      <p>Description: {{ img.description }}</p>
-      <p>Location: {{ img.location }}</p>
-      <p>Likes: {{ img.likes_count }}</p>
+        <img src="{{ img.s3_url }}" alt="image" style="max-width: 300px; display:block; margin-top:5px;">
+        <p>Likes: {{ img.likes_count }}</p>
+        <p>Description: {{ img.description }}</p>
 
-      {% if editing_image_id == img.id %}
-      <form method="post" action="{{ url_for('images.images_edit', image_id=img.id) }}" method="post">
-        <input type="text" name="description" value="{{ img.description }}">
-        <input type="text" name="location" value="{{ img.location }}">
-        <button type="submit">Save</button>
-      </form>
-    {% else %}
-      <form action="{{ url_for('images.images_edit', image_id=img.id) }}" method="get" style="display:inline;">
-        <button type="submit">Edit</button>
-      </form>
-    {% endif %}
+        {% if img.location_is_hidden %}
+            {% if unlocked_images and img.id in unlocked_images %}
+                <p>Location: {{ img.location }}</p>
+            {% else %}
+                <p>Location: Hidden location</p>
+                <form method="post" action="{{ url_for('images.unlock_location', image_id=img.id) }}">
+                    <input type="password" name="password" placeholder="Enter password to view location">
+                    <button type="submit">Unlock</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <p>Location: {{ img.location }}</p>
+        {% endif %}
 
-      {% if img.is_liked_by_user %}
-        <form method="post"
-              action="{{ url_for('images.unlike_image', image_id=img.id) }}"
-              style="display:inline">
-            <button type="submit">Unlike</button>
-        </form>
-      {% else %}
-        <form method="post"
-              action="{{ url_for('images.like_image', image_id=img.id) }}"
-              style="display:inline">
-            <button type="submit">Like</button>
-        </form>
-      {% endif %}
+        {% if img.user_id == current_user_id %}
+            {% if editing_image_id == img.id %}
+                <form method="post" action="{{ url_for('images.images_edit', image_id=img.id) }}">
+                    <input type="text" name="description" value="{{ img.description }}">
+                    <label>
+                        <input type="checkbox" name="hide_location"
+                               {% if img.location_is_hidden %}checked{% endif %}>
+                        Hide location
+                    </label>
+                    <input type="password" name="location_password" placeholder="New password (if hidden)">
+                    <input type="text" name="location" value="{{ img.location }}" placeholder="Location">
+                    <button type="submit">Save</button>
+                </form>
+            {% else %}
+                <form action="{{ url_for('images.images_edit', image_id=img.id) }}" method="get" style="display:inline;">
+                    <button type="submit">Edit</button>
+                </form>
+            {% endif %}
+        {% endif %}
 
-      {% if img.user_id == current_user_id %}
-      <form method="post"
-            action="{{ url_for('images.images_delete', image_id=img.id) }}"
-            style="display:inline">
-          <button type="submit">Delete</button>
-      </form>
-      {% endif %}
+        {% if img.is_liked_by_user %}
+            <form method="post"
+                  action="{{ url_for('images.unlike_image', image_id=img.id) }}"
+                  style="display:inline">
+                <button type="submit">Unlike</button>
+            </form>
+        {% else %}
+            <form method="post"
+                  action="{{ url_for('images.like_image', image_id=img.id) }}"
+                  style="display:inline">
+                <button type="submit">Like</button>
+            </form>
+        {% endif %}
+
+        {% if img.user_id == current_user_id %}
+            <form method="post"
+                  action="{{ url_for('images.images_delete', image_id=img.id) }}"
+                  style="display:inline">
+                <button type="submit">Delete</button>
+            </form>
+        {% endif %}
     </li>
   {% else %}
     <li>No images yet.</li>
