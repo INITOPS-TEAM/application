@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from .models import Image, Like
 from . import db
 from .utils import require_login, user_upload_dir, ALLOWED_EXT, handle_hidden_location
+from botocore.client import Config
 
 image_routes = Blueprint("images", __name__)
 
