@@ -16,6 +16,8 @@ class Image(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), server_default=text("now()"), nullable=False)
     description = db.Column(db.String, nullable=True)
     location = db.Column(db.String, nullable=True)
+    location_is_hidden = db.Column(db.Boolean, default=False)
+    location_password_hash = db.Column(db.String(255), nullable=True)
 
 class Like(db.Model):
     __tablename__ = "likes"
