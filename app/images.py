@@ -13,7 +13,11 @@ from botocore.client import Config
 image_routes = Blueprint("images", __name__)
 
 def get_s3():
-    return boto3.client("s3")
+    return boto3.client(
+            "s3",
+            config=Config(signature_version='s3v4'),
+            region_name=os.environ.get("AWS_REGION"),
+    )
 
 @image_routes.get("/images")
 def images_list():
