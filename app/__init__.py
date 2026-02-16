@@ -1,9 +1,10 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
+from flask_migrate import Migrate
 from .utils import get_client_ip
 db = SQLAlchemy()
+migrate = Migrate()
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -21,8 +22,9 @@ def create_app() -> Flask:
     app.config["S3_BUCKET_NAME"] = os.environ["S3_BUCKET_NAME"]
 
     db.init_app(app)
+    migrate.init_app(app, db)
 
-    from .models import User, Image, Like
+    from .models import User, Image, Like, Banned
     from .auth import auth_routes
     from .images import image_routes
     from .admin import admin_routes
@@ -55,17 +57,5 @@ def create_app() -> Flask:
             return redirect("https://zakon.rada.gov.ua/laws/show/2341-14/conv/paran1661#n1661")
 
         return None
-
-    with app.app_context():
-        required = {"users", "images", "banned"}
-        rows = db.session.execute(
-            text("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname='public';")
-        ).fetchall()
-        existing = {r[0] for r in rows}
-        missing = required - existing
-        if missing:
-            raise RuntimeError(
-                f"Missing DB tables: {sorted(missing)}. Run DB setup first."
-            )
 
     return app

@@ -4,3 +4,4 @@ psycopg2-binary==2.9.9
 Werkzeug==3.0.3
 SQLAlchemy==2.0.36
 boto3==1.42.47
+Flask-Migrate==4.1.0
