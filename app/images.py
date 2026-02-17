@@ -16,9 +16,7 @@ def get_s3():
     return boto3.client(
             "s3",
             config=Config(signature_version='s3v4'),
-            region_name=os.environ.get("AWS_REGION"),
-            aws_access_key_id=os.environ.get("AWS_ACCESS_KEY"),
-            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY") # ONLY FOR TESTING
+            region_name=os.environ.get("AWS_REGION")
     )
 
 @image_routes.get("/images")
