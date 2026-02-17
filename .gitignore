@@ -7,4 +7,3 @@ package-lock.json
 package.json
 instance/
 .env
-migrations/
