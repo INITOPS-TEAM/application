@@ -16,7 +16,7 @@ def get_s3():
     return boto3.client(
             "s3",
             config=Config(signature_version='s3v4'),
-            region_name=os.environ.get("AWS_REGION"),
+            region_name=os.environ.get("AWS_REGION")
     )
 
 @image_routes.get("/images")
